@@ -1,5 +1,8 @@
 from langchain_core.tools import tool
-from embedding import read_and_query, read_and_retrieve
+from embedding_loader import read_and_query, read_and_retrieve
+import time
+from datetime import datetime
+from langsmith import traceable
 
 # ============================================================================
 # IMPROVEMENT NEEDED: Add better imports for error handling
@@ -13,6 +16,7 @@ from embedding import read_and_query, read_and_retrieve
 
 
 @tool
+@traceable
 def query_knowledge_base(query: str) -> str:
     # ============================================================================
     # IMPROVEMENT NEEDED: Enhance docstring (2025 best practice)
@@ -35,6 +39,14 @@ def query_knowledge_base(query: str) -> str:
     """Use this tool to query our knowledge base about projects, products, or general info."""
     # TODO: Replace with detailed docstring (see IMPLEMENTATION_PLAN.md)
 
+    print("============================================================")
+    print("🔍 TOOL INVOKED: query_knowledge_base")
+    print(f"📝 Query: {query}")
+    print(f"⏱️  Tool start time: {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
+    print("============================================================")
+
+    tool_start = time.time()
+
     # ============================================================================
     # IMPROVEMENT NEEDED: Add error handling
     # ============================================================================
@@ -50,6 +62,15 @@ def query_knowledge_base(query: str) -> str:
     # ============================================================================
 
     response = read_and_query(query)
+
+    tool_end = time.time()
+    tool_duration = tool_end - tool_start
+
+    print("============================================================")
+    print("✅ TOOL COMPLETED: query_knowledge_base")
+    print(f"⏱️  Tool duration: {tool_duration:.2f} seconds")
+    print("============================================================")
+
     return str(response)
 
 # ============================================================================
@@ -64,8 +85,25 @@ def query_knowledge_base(query: str) -> str:
 #
 # PRIORITY: CRITICAL - Fix before using
 # ============================================================================
-def retrieved_knowledge_base(query: str) -> str:  # 🔴 TYPO: Should be "retrieve_knowledge_base"
+@tool
+@traceable
+def retrieve_Fitted_Products(query: str) -> str:  
+    """
+    Retrieve product recommendations from the knowledge base matching user requirements.
+
+    This tool finds and returns the most relevant products based on user preferences,
+    requirements, or characteristics (e.g., swing speed, handicap, playing style, budget).
+    It returns raw product information.
+
+    
+    """
     # 🔴 MISSING: @tool decorator above this function
+
+    print("============================================================")
+    print("🎯 TOOL INVOKED: retrieved_knowledge_base_product")
+    print(f"📝 Query: {query}")
+    print(f"⏱️  Tool start time: {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
+    print("============================================================")
 
     # ============================================================================
     # IMPROVEMENT NEEDED: Add comprehensive docstring
@@ -93,12 +131,129 @@ def retrieved_knowledge_base(query: str) -> str:  # 🔴 TYPO: Should be "retrie
     # context_str = "\n\n--- Document Chunk ---\n\n".join([node.get_content() for node in nodes])
     # return context_str
     # ============================================================================
+    tool_start = time.time()
 
-    response = read_and_retrieve(query)  # Returns list of nodes, not str
-    return str(response)  # This won't format well - returns repr(nodes)
+    try:
+        # ✅ This should return a list of nodes or documents
+        nodes = read_and_retrieve(query)
+
+        if not nodes:
+            print("⚠️  No results found.")
+            return "No relevant products found in the knowledge base."
+
+        # ✅ Ensure all contents are strings
+        context_str = "\n\n--- Product ---\n\n".join(
+            str(node.get_content()) for node in nodes
+        )
+
+        tool_end = time.time()
+        print("============================================================")
+        print("✅ TOOL COMPLETED SUCCESSFULLY")
+        print(f"📦 Returned {len(nodes)} product entries")
+        for node in nodes:
+            print(f"📄 Formatted Content: {node.get_content()}")
+        print(f"⏱️  Tool duration: {tool_end - tool_start:.2f} seconds")
+        print("============================================================")
+
+        return context_str
+
+    except Exception as e:
+        print("============================================================")
+        print("❌ TOOL ERROR")
+        print(f"🧠 Exception: {str(e)}")
+        print("============================================================")
+        return f"Error: {str(e)}"
+    
 
 
-# ============================================================================
+
+
+
+
+@tool
+@traceable
+def retrieve_Fitting_Instructions(query: str) -> str:
+    """
+    Retrieve golf club fitting instructions or guidance from the knowledge base.
+
+    This tool searches the indexed fitting and instructional documents to return 
+    the most relevant information about club fitting techniques, swing adjustments, 
+    or customization processes based on the user's question or situation.
+
+    Use this tool when:
+    - The user asks how to perform or interpret a club fitting.
+    - The user requests guidance on shaft flex, lie angle, grip size, or launch conditions.
+    - The user describes their swing, equipment, or performance metrics and wants fitting advice.
+    - The user asks for step-by-step fitting procedures or setup recommendations.
+
+    Do NOT use when:
+    - The user requests general golf tips unrelated to fitting (use `query_knowledge_base` instead).
+    - The user wants product suggestions or comparisons (use `retrieved_knowledge_base_product` instead).
+    - The user asks about store locations or services (use a dedicated service lookup tool if available).
+
+    Args:
+        query (str): 
+            A natural-language question or request about club fitting, e.g.:
+            - "How do I know if I need a stiffer shaft?"
+            - "What driver loft should I use for a 105 mph swing speed?"
+            - "Explain how to perform a proper club fitting."
+
+    Returns:
+        str: 
+            Formatted text containing relevant fitting information or procedures 
+            retrieved directly from the knowledge base. If no results are found, 
+            returns an informative message indicating that no matching data exists.
+
+    Notes:
+        - This function performs retrieval-only (no synthesis or summarization).
+        - The response reflects raw knowledge base content for accuracy.
+        - Used by the LLM agent when precise, instructional, or technical fitting 
+          information is needed to support user queries.
+    """
+
+    print("============================================================")
+    print("🎯 TOOL INVOKED: retrieved_knowledge_base_product")
+    print(f"📝 Query: {query}")
+    print(f"⏱️  Tool start time: {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
+    print("============================================================")
+
+    tool_start = time.time()
+
+    try:
+        # ✅ This should return a list of nodes or documents
+        nodes = read_and_retrieve(query, doc_path="src/storage/fitting_book_emb/")
+
+        if not nodes:
+            print("⚠️  No results found.")
+            return "No relevant products found in the knowledge base."
+
+        # ✅ Ensure all contents are strings
+        context_str = "\n\n--- Product ---\n\n".join(
+            str(node.get_content()) for node in nodes
+        )
+
+        tool_end = time.time()
+        print("============================================================")
+        print("✅ TOOL COMPLETED SUCCESSFULLY")
+        print(f"📦 Returned {len(nodes)} product entries")
+        for node in nodes:
+            print(f"📄 Formatted Content: {node.get_content()}")
+        print(f"⏱️  Tool duration: {tool_end - tool_start:.2f} seconds")
+        print("============================================================")
+
+        return context_str
+
+    except Exception as e:
+        print("============================================================")
+        print("❌ TOOL ERROR")
+        print(f"🧠 Exception: {str(e)}")
+        print("============================================================")
+        return f"Error: {str(e)}"
+    
+
+
+
+
 # CORRECTED VERSION (TODO: Replace above function with this)
 # ============================================================================
 # @tool

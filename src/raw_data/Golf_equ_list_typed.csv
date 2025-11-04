@@ -1,0 +1,153 @@
+club,number,loft,hand,lie,volume,length,sw,Type_Check,Type
+Qi35 LS Driver,,8°,RH,54°–58°,460CC,45.75”,D4,✅ Golf Club,Driver
+Qi35 LS Driver,,9°,RH/LH,54°–58°,460CC,45.75”,D4,✅ Golf Club,Driver
+Qi35 LS Driver,,10.5°,RH/LH,54°–58°,460CC,45.75”,D4,✅ Golf Club,Driver
+Qi35 Driver,,9°,RH/LH,56°–60°,460CC,45.75”,D3,✅ Golf Club,Driver
+Qi35 Driver,,10.5°,RH/LH,56°–60°,460CC,45.75”,D3,✅ Golf Club,Driver
+Qi35 Driver,,12°,RH,56°–60°,460CC,45.75”,D3,✅ Golf Club,Driver
+Qi35 Max Driver,,9°,RH/LH,58°–62°,460CC,45.75”,D5,✅ Golf Club,Driver
+Qi35 Max Driver,,10.5°,RH/LH,58°–62°,460CC,45.75”,D5,✅ Golf Club,Driver
+Qi35 Max Driver,,12°,RH,58°–62°,460CC,45.75”,D5,✅ Golf Club,Driver
+Qi35 Max Lite Driver,,10.5°,RH/LH,58°–62°,460CC,45.75”,D0,✅ Golf Club,Driver
+Qi35 Max Lite Driver,,12°,RH/LH,58°–62°,460CC,45.75”,D0,✅ Golf Club,Driver
+Qi35 Max Women’s Lite Driver,,10.5°,RH,58°–62°,460CC,44”,C3,✅ Golf Club,Driver
+Qi35 Max Women’s Lite Driver,,12°,RH,58°–62°,460CC,44”,C3,✅ Golf Club,Driver
+Qi35 Tour Fairway,3,15°,RH/LH,57°–61°,170CC,43.25”,D3,✅ Golf Club,Fairway
+Qi35 Tour Fairway,5,18°,RH/LH,57.5°–61.5°,150CC,42.25”,D3,✅ Golf Club,Fairway
+Qi35 Tour Fairway,7,21°,RH,58°–62°,150CC,41.75”,D3,✅ Golf Club,Fairway
+Qi35 Fairway,3,15°,RH/LH,57°–61°,185CC,43.25”,D3,✅ Golf Club,Fairway
+Qi35 Fairway,3HL,16.5°,RH,57°–61°,185CC,43.25”,D3,✅ Golf Club,Fairway
+Qi35 Fairway,5,18°,RH/LH,57.5°–61.5°,165CC,42.25”,D3,✅ Golf Club,Fairway
+Qi35 Fairway,7,21°,RH,60°,165CC,41.75”,D3,✅ Golf Club,Fairway
+Qi35 Max Fairway,3,15.5°,RH/LH,57°–61°,190CC,43.25”,D1,✅ Golf Club,Fairway
+Qi35 Max Fairway,5,18.5°,RH/LH,57.5°–61.5°,175CC,42.25”,D1,✅ Golf Club,Fairway
+Qi35 Max Fairway,7,21.5°,RH/LH,60°,175CC,41.75”,D1,✅ Golf Club,Fairway
+Qi35 Max Fairway,9,24.5°,RH,60.5°,165CC,41.5”,D1,✅ Golf Club,Fairway
+Qi35 Max Lite Fairway,3,15.5°,RH/LH,57°–61°,190CC,43.25”,D1,✅ Golf Club,Fairway
+Qi35 Max Lite Fairway,5,18.5°,RH/LH,57.5°–61.5°,175CC,42.25”,D1,✅ Golf Club,Fairway
+Qi35 Max Lite Fairway,7,21.5°,RH/LH,60°,175CC,41.75”,D1,✅ Golf Club,Fairway
+Qi35 Max Women’s Fairway,3,15.5°,RH,57°–61°,190CC,42”,C5,✅ Golf Club,Fairway
+Qi35 Max Women’s Fairway,5,18.5°,RH,57.5°–61.5°,175CC,41”,C5,✅ Golf Club,Fairway
+Qi35 Max Women’s Fairway,7,21.5°,RH,60°,175CC,40.5”,C5,✅ Golf Club,Fairway
+Qi35 Rescue,2,17°,RH,56°–60°,,41.25”,D2/D3,✅ Golf Club,Hybrid
+Qi35 Rescue,3,19°,RH/LH,56.5°–60.5°,,40.75”,D2/D3,✅ Golf Club,Hybrid
+Qi35 Rescue,4,22°,RH/LH,57°–61°,,40.25”,D2/D3,✅ Golf Club,Hybrid
+Qi35 Rescue,5,25°,RH/LH,57.5°–61.5°,,39.75”,D2/D3,✅ Golf Club,Hybrid
+Qi35 Max Rescue,3,20°,RH/LH,59°,,40.75”,D2,✅ Golf Club,Hybrid
+Qi35 Max Rescue,4,23°,RH/LH,59.5°,,40.25”,D2,✅ Golf Club,Hybrid
+Qi35 Max Rescue,5,27°,RH/LH,60°,,39.75”,D2,✅ Golf Club,Hybrid
+Qi35 Max Rescue,6,31°,RH,60.5°,,39.25”,D2,✅ Golf Club,Hybrid
+Qi35 Max Rescue,7,35°,RH,61°,,38.75”,D2,✅ Golf Club,Hybrid
+Qi35 Max Lite Rescue,4,23°,RH/LH,59.5°,,40.25”,D0,✅ Golf Club,Hybrid
+Qi35 Max Lite Rescue,5,27°,RH/LH,60°,,39.75”,D0,✅ Golf Club,Hybrid
+Qi35 Max Lite Rescue,6,31°,RH,60.5°,,39.25”,D0,✅ Golf Club,Hybrid
+Qi35 Max Lite Rescue,7,35°,RH,61°,,38.75”,D0,✅ Golf Club,Hybrid
+Qi35 Max Lite Women’s Rescue,4,23°,RH,59.5°,,38.75”,C4,✅ Golf Club,Hybrid
+Qi35 Max Lite Women’s Rescue,5,27°,RH,60°,,38.25”,C4,✅ Golf Club,Hybrid
+Qi35 Max Lite Women’s Rescue,6,31°,RH,60.5°,,37.75”,C4,✅ Golf Club,Hybrid
+Qi35 Max Lite Women’s Rescue,7,35°,RH,61°,,37.25”,C4,✅ Golf Club,Hybrid
+P·UDI,2,18°,RH/LH,60°,,39.75”,D2,⚠️ Unknown / Check Manually,Other
+P·UDI,3,20°,RH/LH,60.5°,,39.25”,D2,⚠️ Unknown / Check Manually,Other
+P·UDI,4,22°,RH/LH,61°,,38.75”,D2,⚠️ Unknown / Check Manually,Other
+P·DHY,2,17°,RH/LH,60°,,39.75”,D2,⚠️ Unknown / Check Manually,Other
+P·DHY,3,20°,RH/LH,60.5°,,39.25”,D1,⚠️ Unknown / Check Manually,Other
+P·DHY,4,22°,RH/LH,61°,,38.75”,D1,⚠️ Unknown / Check Manually,Other
+Qi Iron,4,18.5°,RH/LH,61.5°,,39.125”,D1,✅ Golf Club,Iron
+Qi Iron,5,21°,RH/LH,62°,,38.5”,D1,✅ Golf Club,Iron
+Qi Iron,6,24°,RH/LH,62.5°,,37.88”,D1,✅ Golf Club,Iron
+Qi Iron,7,28°,RH/LH,63°,,37.25”,D1,✅ Golf Club,Iron
+Qi Iron,8,32°,RH/LH,63.5°,,36.75”,D1,✅ Golf Club,Iron
+Qi Iron,9,37°,RH/LH,64°,,36.25”,D1,✅ Golf Club,Iron
+Qi Iron,PW,43°,RH/LH,64.5°,,35.75”,D1,✅ Golf Club,Iron
+Qi Iron,AW,49°,RH/LH,64.5°,,35.5”,D1,✅ Golf Club,Iron
+Qi Iron,SW,54°,RH/LH,64.5°,,35.25”,D2,✅ Golf Club,Iron
+Qi Iron,LW,59°,RH,64.5°,,35”,D3,✅ Golf Club,Iron
+Qi HL Iron,5,23.5°,RH/LH,62°,,38.5”,D0,✅ Golf Club,Iron
+Qi HL Iron,6,26.5°,RH/LH,62.5°,,37.88”,D0,✅ Golf Club,Iron
+Qi HL Iron,7,30°,RH/LH,63°,,37.25”,D0,✅ Golf Club,Iron
+Qi HL Iron,8,34°,RH/LH,63.5°,,36.75”,D0,✅ Golf Club,Iron
+Qi HL Iron,9,38.5°,RH/LH,64°,,36.25”,D0,✅ Golf Club,Iron
+Qi HL Iron,PW,44.5°,RH/LH,64.5°,,35.75”,D0,✅ Golf Club,Iron
+Qi HL Iron,AW,49°,RH/LH,64.5°,,35.5”,D0,✅ Golf Club,Iron
+Qi HL Iron,SW,54°,RH/LH,64.5°,,35.25”,D0,✅ Golf Club,Iron
+P·790 Iron,4,23°,RH/LH,61°,,38.5”,D2,✅ Golf Club,Iron
+P·790 Iron,5,26.5°,RH/LH,61.5°,,38”,D2,✅ Golf Club,Iron
+P·790 Iron,6,30°,RH/LH,62°,,37.5”,D2,✅ Golf Club,Iron
+P·790 Iron,7,34°,RH/LH,62.5°,,37”,D2,✅ Golf Club,Iron
+P·790 Iron,8,38.5°,RH/LH,63°,,36.5”,D2,✅ Golf Club,Iron
+P·790 Iron,9,43°,RH/LH,63.5°,,36”,D3,✅ Golf Club,Iron
+P·790 Iron,PW,49°,RH/LH,64°,,35.5”,D3,✅ Golf Club,Iron
+P·770,3,19°,RH/LH,60.5°,,39”,D2,⚠️ Unknown / Check Manually,Other
+P·770,4,22°,RH/LH,61°,,38.5”,D2,⚠️ Unknown / Check Manually,Other
+P·770,5,25.5°,RH/LH,61.5°,,38”,D2,⚠️ Unknown / Check Manually,Other
+P·770,6,29°,RH/LH,62°,,37.5”,D2,⚠️ Unknown / Check Manually,Other
+P·770,7,33°,RH/LH,62.5°,,37”,D2,⚠️ Unknown / Check Manually,Other
+P·770,8,37°,RH/LH,63°,,36.5”,D2,⚠️ Unknown / Check Manually,Other
+P·770,9,41°,RH/LH,63.5°,,36”,D2,⚠️ Unknown / Check Manually,Other
+P·770,PW,45°,RH/LH,64°,,35.75”,D3,⚠️ Unknown / Check Manually,Other
+P·770,AW,50°,RH,64°,,35.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,3,20°,RH/LH,60.5°,,39”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,4,23°,RH/LH,61°,,38.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,5,26°,RH/LH,61.5°,,38”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,6,29°,RH/LH,62°,,37.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,7,33°,RH/LH,62.5°,,37”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,8,37°,RH/LH,63°,,36.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,9,41°,RH/LH,63.5°,,36”,D3,⚠️ Unknown / Check Manually,Other
+P·7CB,PW,46°,RH/LH,64°,,35.75”,D4,⚠️ Unknown / Check Manually,Other
+P·7CB,AW,51°,RH,64°,,35.5”,D4,⚠️ Unknown / Check Manually,Other
+P·7MB,3,20°,RH/LH,60.5°,,39”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,4,23°,RH/LH,61°,,38.5”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,5,26°,RH/LH,61.5°,,38”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,6,30°,RH/LH,62°,,37.5”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,7,34°,RH/LH,62.5°,,37”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,8,38°,RH/LH,63°,,36.5”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,9,42.5°,RH/LH,63.5°,,36”,D2,⚠️ Unknown / Check Manually,Other
+P·7MB,PW,47°,RH/LH,64°,,35.75”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,3,21°,RH,59.5°,,39”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,4,24°,RH,60°,,38.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,5,27°,RH,60.5°,,38”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,6,31°,RH,61°,,37.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,7,35°,RH,61.5°,,37”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,8,39°,RH,62.5°,,36.5”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,9,43°,RH,63°,,36”,D3,⚠️ Unknown / Check Manually,Other
+P·7TW,PW,47°,RH,63.5°,,35.75”,D3,⚠️ Unknown / Check Manually,Other
+MG5 LB,,56.08°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 LB,,58.08°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 LB,,60.08°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SC,,54.10°,RH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SC,,56.10°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SC,,58.09°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SC,,60.09°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SB,,46.09°,RH,64°,,35.75”,D3,⚠️ Unknown / Check Manually,Other
+MG5 SB,,48.09°,RH,64°,,35.75”,D3,⚠️ Unknown / Check Manually,Other
+MG5 SB,,50.09°,RH/LH,64°,,35.5”,D3,⚠️ Unknown / Check Manually,Other
+MG5 SB,,52.09°,RH/LH,64°,,35.5”,D3,⚠️ Unknown / Check Manually,Other
+MG5 SB,,54.12°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SB,,56.12°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SB,,58.10°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SB,,60.10°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SX,,58.11°,RH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 SX,,60.11°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 HB,,54.13°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 HB,,56.14°,RH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 HB,,58.12°,RH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 HB,,60.12°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+MG5 TW,,56.12°,RH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+MG5 TW,,60.11°,RH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,50°,RH/LH,64°,,35.5”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,52°,RH/LH,64°,,35.5”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,54°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,56°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,58°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATS,,60°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATV,,56°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+ATV,,58°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATV,,60°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATX,,56°,RH/LH,64°,,35.25”,D5,⚠️ Unknown / Check Manually,Other
+ATX,,58°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATX,,60°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATC,,58°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATC,,60°,RH/LH,64°,,35”,D5,⚠️ Unknown / Check Manually,Other
+ATW,,56°,RH/LH,64°,,35.25”,D3,⚠️ Unknown / Check Manually,Other
+ATW,,58°,RH/LH,64°,,35”,D3,⚠️ Unknown / Check Manually,Other
+ATW,,60°,RH/LH,64°,,35”,D3,⚠️ Unknown / Check Manually,Other

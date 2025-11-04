@@ -5,12 +5,27 @@ This module demonstrates how to create an LLM agent with custom tools using Lang
 """
 
 import os
+import time
+import logging
+from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from langchain_openai import ChatOpenAI
 from typing import Optional
-from langgraph.prebuilt import create_react_agent
-from tools import query_knowledge_base, retrieved_knowledge_base
+from langchain.agents import create_agent
+from tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products
 from pydantic import SecretStr
+import openai
+from langgraph.checkpoint.memory import MemorySaver
+from langsmith import traceable
+
+# ============================================================================
+# Configure Debug Logging
+# ============================================================================
+# logging.basicConfig(
+#     level=logging.DEBUG,  # Set to DEBUG to see all message flow
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
+# logger = logging.getLogger(__name__)
 
 # ============================================================================
 # IMPROVEMENT NEEDED: Add imports for memory and logging (2025 best practices)
@@ -77,11 +92,11 @@ else:
 # ============================================================================
 
 llm = ChatOpenAI(
-    model='gpt-5-nano',
+    model='gpt-5-mini',
     temperature=0,  # Good: 0 for consistent, deterministic responses
     base_url=OPENAI_API_BASE,
     api_key=SecretStr(api_key) if api_key else None,
-    # TODO: Add timeout=30.0 to prevent hanging
+    timeout=1000
 )   
 print("✅ Model initialized")
 # TODO: Replace with logger.info("Model initialized: gpt-5-nano")
@@ -140,15 +155,18 @@ with open("src/Prompt/golf_advisor_prompt.md", "r", encoding="utf-8") as f:
 # For production, use PostgresSaver instead of MemorySaver
 # ============================================================================
 
+# Create checkpointer for state management
+checkpointer = MemorySaver()
+
 # Create agent with prompt parameter
-# Note: checkpointer=False disables state persistence to avoid message ordering issues
-agent = create_react_agent(
+# Note: Checkpointer ENABLED to maintain proper message history for multi-tool calls
+agent = create_agent(
     model=llm,
-    tools=[retrieved_knowledge_base],  # TODO: Add retrieve_knowledge_base tool when fixed
-    prompt=system_message,
-    checkpointer=False  # 🔴 CRITICAL: Change to MemorySaver() for conversation memory
+    tools=[retrieve_Fitting_Instructions], #[retrieved_knowledge_base_product],
+    system_prompt=system_message,
+    checkpointer=False,  # ✅ Enabled with MemorySaver to maintain message history
     # TODO: Add state_modifier for better control (2025 feature)
-    # TODO: Add max_iterations=10 to prevent infinite loops
+
 )
 
 # ============================================================================
@@ -165,31 +183,95 @@ if __name__ == "__main__":
     # ============================================================================
 
     print("\n" + "="*60)
-    print("Sending query to agent...")
+    print("🔍 DIAGNOSTIC MODE: Tracking all API calls and timings")
     print("="*60)
     # TODO: Replace with logger.info("Starting agent query")
 
-    # Create fresh message with proper format
-    user_message = (
+    # Create user query
+    user_query = (
         "- Driver Swing Speed: Average 121.5 mph, Peak 124.4 mph\n"
         "- Ball Speed: Up to 180 mph, notable 186 mph\n"
         "- Height: 6 feet 1 inch (185 cm)\n"
         "- Weight: 185 pounds (84 kg)\n"
         "- Age: 49 years old\n"
-        "- What should my driver be like?"
+        "- What should my driver be like?\n"
+        "- What Driver should I get?"
     )
 
-    # ============================================================================
-    # IMPROVEMENT NEEDED: Add config with thread_id for memory
-    # ============================================================================
-    # When checkpointing is enabled, MUST pass config with thread_id:
-    # config = {"configurable": {"thread_id": "session_001"}}
-    # response = agent.invoke({"messages": [("user", user_message)]}, config=config)
-    #
-    # This enables conversation memory across multiple invoke() calls
-    # ============================================================================
+    print(f"\n📝 User query length: {len(user_query)} characters")
+    
 
-    response = agent.invoke({"messages": [("user", user_message)]})
+    # Create config with thread_id for checkpointer
+    config = {"configurable": {"thread_id": "session_001"}}
+
+    # ============================================================================
+    # DIAGNOSTIC: Track total execution time
+    # ============================================================================
+    print(f"\n⏱️  START TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}")
+    start_time = time.time()
+
+    print("\n" + "="*60)
+    print("📤 Sending query to agent...")
+    print("="*60)
+
+    # ============================================================================
+    # DIAGNOSTIC: Comprehensive error handling and timing
+    # ============================================================================
+    try:
+        print("\n🚀 Phase 1: Invoking agent.invoke()...")
+        invoke_start = time.time()
+
+        response = agent.invoke(
+            {"messages": [{"role": "user", "content": user_query}]},
+            config={"configurable": {"thread_id": "session_001"}}
+        )
+
+        invoke_end = time.time()
+        invoke_duration = invoke_end - invoke_start
+
+        print(f"\n✅ Agent.invoke() completed successfully!")
+        print(f"⏱️  Duration: {invoke_duration:.2f} seconds")
+
+    except openai.APITimeoutError as e:
+        end_time = time.time()
+        duration = end_time - start_time
+        print("\n" + "="*60)
+        print("❌ TIMEOUT ERROR DETECTED")
+        print("="*60)
+        print(f"⏱️  Total time before timeout: {duration:.2f} seconds")
+        print(f"📝 Timeout setting: 80 seconds")
+        print(f"🔍 Error details: {str(e)}")
+        print("\n📊 DIAGNOSTIC ANALYSIS:")
+        print(f"   - If duration ≈ 80s: Agent planning or synthesis call timed out")
+        print(f"   - If duration < 80s: Embedding API call may have timed out")
+        print(f"   - Actual duration: {duration:.2f}s")
+        print("\n💡 Next steps:")
+        print("   1. Check network connectivity to api.agicto.cn")
+        print("   2. Verify model 'gpt-5-nano' is valid on your endpoint")
+        print("   3. Test endpoint directly with curl/requests")
+        print("="*60)
+        raise
+
+    except Exception as e:
+        end_time = time.time()
+        duration = end_time - start_time
+        print("\n" + "="*60)
+        print("❌ UNEXPECTED ERROR")
+        print("="*60)
+        print(f"⏱️  Time before error: {duration:.2f} seconds")
+        print(f"🔍 Error type: {type(e).__name__}")
+        print(f"📝 Error message: {str(e)}")
+        print("="*60)
+        raise
+
+    # ============================================================================
+    # DIAGNOSTIC: Track total time
+    # ============================================================================
+    end_time = time.time()
+    total_duration = end_time - start_time
+    print(f"\n⏱️  END TIME: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}")
+    print(f"⏱️  TOTAL EXECUTION TIME: {total_duration:.2f} seconds")
+
     # TODO: Add config parameter when checkpointing is enabled
 
     print("\n" + "="*60)
