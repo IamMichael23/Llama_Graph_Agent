@@ -11,12 +11,14 @@ from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from langchain_openai import ChatOpenAI
 from typing import Optional
+from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
-from tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products
+from tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products, dummy_tool
 from pydantic import SecretStr
 import openai
 from langgraph.checkpoint.memory import MemorySaver
 from langsmith import traceable
+from langchain_core.messages import AIMessage, ToolMessage
 
 # ============================================================================
 # Configure Debug Logging
@@ -92,14 +94,14 @@ else:
 # ============================================================================
 
 llm = ChatOpenAI(
+    
     model='gpt-5-mini',
     temperature=0,  # Good: 0 for consistent, deterministic responses
     base_url=OPENAI_API_BASE,
     api_key=SecretStr(api_key) if api_key else None,
-    timeout=1000
-)   
-print("✅ Model initialized")
-# TODO: Replace with logger.info("Model initialized: gpt-5-nano")
+    timeout=1000 
+)
+
 
 
 # ============================================================================
@@ -121,6 +123,12 @@ print("✅ Model initialized")
 # Load custom prompt from markdown file
 with open("src/Prompt/golf_advisor_prompt.md", "r", encoding="utf-8") as f:
     system_message = f.read()
+
+# ============================================================================
+# Message Validation Helper
+# ============================================================================
+    
+# ============================================================================
 
 # ============================================================================
 # 🔴 CRITICAL LIMITATION: Memory disabled!
@@ -162,10 +170,11 @@ checkpointer = MemorySaver()
 # Note: Checkpointer ENABLED to maintain proper message history for multi-tool calls
 agent = create_agent(
     model=llm,
-    tools=[retrieve_Fitting_Instructions], #[retrieved_knowledge_base_product],
-    system_prompt=system_message,
-    checkpointer=False,  # ✅ Enabled with MemorySaver to maintain message history
+    tools=[dummy_tool],
+    #system_prompt=system_message,
+    checkpointer=False  # ✅ Enabled with MemorySaver to maintain message history
     # TODO: Add state_modifier for better control (2025 feature)
+
 
 )
 
@@ -199,10 +208,10 @@ if __name__ == "__main__":
     )
 
     print(f"\n📝 User query length: {len(user_query)} characters")
-    
 
     # Create config with thread_id for checkpointer
     config = {"configurable": {"thread_id": "session_001"}}
+    print(f"📋 Using thread_id: session_001")
 
     # ============================================================================
     # DIAGNOSTIC: Track total execution time
@@ -222,8 +231,7 @@ if __name__ == "__main__":
         invoke_start = time.time()
 
         response = agent.invoke(
-            {"messages": [{"role": "user", "content": user_query}]},
-            config={"configurable": {"thread_id": "session_001"}}
+            {"messages": [{"role": "user", "content": user_query}]}
         )
 
         invoke_end = time.time()
@@ -275,8 +283,9 @@ if __name__ == "__main__":
     # TODO: Add config parameter when checkpointing is enabled
 
     print("\n" + "="*60)
-    print("Agent Response:")
+    print("Agent Response:", response["messages"][-1].content)
     print("="*60)
+   
 
     # ============================================================================
     # IMPROVEMENT NEEDED: Better response parsing and error handling
@@ -286,20 +295,7 @@ if __name__ == "__main__":
     # TODO: Log tool calls for debugging
     # ============================================================================
 
-    if "messages" in response:
-        for message in response["messages"]:
-            if hasattr(message, 'type') and hasattr(message, 'content'):
-                print(f"\n[{message.type.upper()}]: {message.content}")
-                # Check for tool calls
-                if hasattr(message, 'tool_calls') and message.tool_calls:
-                    for tool_call in message.tool_calls:
-                        print(f"  [TOOL CALL] {tool_call.get('name', 'unknown')}({tool_call.get('args', {})})")
-                        # TODO: Add logger.info(f"Tool called: {tool_call.get('name')}")
-    else:
-        print(f"\nRaw response: {response}")
-        # TODO: Add logger.warning(f"Unexpected response format: {response}")
-
-    print("\n" + "="*60)
+    
 
     # ============================================================================
     # IMPROVEMENT NEEDED: Add example of multi-turn conversation

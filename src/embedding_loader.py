@@ -17,7 +17,6 @@ from llama_index.core import StorageContext,load_index_from_storage
 from llama_index.core.response.notebook_utils import display_source_node
 from llama_index.core.node_parser import SemanticSplitterNodeParser
 from llama_index.core.retrievers import QueryFusionRetriever
-from llama_index.retrievers.bm25 import BM25Retriever
 from langsmith import traceable
 from langsmith.wrappers import wrap_openai
 
@@ -40,14 +39,9 @@ def load_embedding_index(path: str = "src/storage/products_emb/"):
     # Load index from storage without recomputing embeddings
 
     # ============================================================================
-    # 🔴 CRITICAL BUG: Model mismatch!
+    # ✅ FIXED: Model consistency
     # ============================================================================
-    # Line 95 (create function) uses: text-embedding-3-large
-    # Line 130 (load function) uses:  text-embedding-3-small  ❌ WRONG!
-    #
-    # MUST BE CONSISTENT or retrieval will fail!
-    #
-    # TODO: Change text-embedding-3-small → text-embedding-3-large
+    # Both create and load functions now use: text-embedding-3-large
     #
     # Research (2025): text-embedding-3-large achieves 80.5% accuracy
     #                  text-embedding-3-small achieves 75.8% accuracy
@@ -58,9 +52,10 @@ def load_embedding_index(path: str = "src/storage/products_emb/"):
     storage_context = StorageContext.from_defaults(persist_dir=path)
     index = load_index_from_storage(storage_context,
                                     embed_model=OpenAIEmbedding(
-                                        model = "text-embedding-3-small",
+                                        model = "text-embedding-3-large",
                                         api_key=os.getenv("EMBEDDING_KEY"),
-                                        api_base=os.getenv("OPENAI_API_BASE")),
+                                        api_base=os.getenv("OPENAI_API_BASE"),
+                                        dimensions=1536),
                                         index_cls=VectorStoreIndex)
 
     load_end = time.time()
@@ -128,11 +123,40 @@ def read_and_query(user_query: str = "what do we have?"):
 
 
 @traceable
-def read_and_retrieve(user_query: str = "what do we have?", doc_path: str = "src/storage/products_emb/"):
+def retrieve_products(user_query: str = "what do we have?"):
+        """
+        Retrieve product information using hybrid BM25 + Vector retrieval.
+        Optimized for structured product data with exact specifications.
+
+        Args:
+            user_query: Query about golf products/equipment
+
+        Returns:
+            list: Retrieved and filtered product nodes
+        """
+        return _retrieve_impl(user_query, "src/storage/products_emb/", similarity_cutoff=0, use_hybrid=True, func_name="retrieve_products")
+
+
+@traceable
+def retrieve_fitting_instructions(user_query: str = "what do we have?"):
+        """
+        Retrieve fitting instructions using pure vector semantic search.
+        Optimized for instructional/conceptual content.
+
+        Args:
+            user_query: Query about fitting guidance/instructions
+
+        Returns:
+            list: Retrieved and filtered instruction nodes
+        """
+        return _retrieve_impl(user_query, "src/storage/fitting_book_emb/", similarity_cutoff=0, use_hybrid=False, func_name="retrieve_fitting_instructions")
+
+
+def _retrieve_impl(user_query: str, doc_path: str, similarity_cutoff: float, use_hybrid: bool, func_name: str = "_retrieve_impl"):
         # ============================================================================
         # DIAGNOSTIC: Track total retrieval time
         # ============================================================================
-        print(f"\n⏱️  [read_and_retrieve] START: {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
+        print(f"\n⏱️  [{func_name}] START: {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
         print(f"📝 Query: {user_query[:100]}...")
         total_start = time.time()
 
@@ -191,24 +215,32 @@ def read_and_retrieve(user_query: str = "what do we have?", doc_path: str = "src
         
 
         # Phase 2: Setup retrievers (no API call)
-        print("\n📊 Phase 2: Setting up hybrid retriever (Vector + BM25)...")
-        setup_start = time.time()
-        vector_retriever = index.as_retriever(similarity_top_k=10)
-        bm25_retriever = BM25Retriever.from_defaults(index=index, similarity_top_k=10)
-        fusion_retriever = QueryFusionRetriever([vector_retriever, bm25_retriever],
-            similarity_top_k=10
-        )
-        setup_end = time.time()
-        print(f"⏱️  Retriever setup: {(setup_end - setup_start):.2f} seconds")
+        if use_hybrid:
+            print("\n📊 Phase 2: Setting up HYBRID retriever (Vector + BM25)...")
+            setup_start = time.time()
+            vector_retriever = index.as_retriever(similarity_top_k=15)
+            bm25_retriever = index.as_retriever(similarity_top_k=15, retriever_mode="bm25")
+            fusion_retriever = QueryFusionRetriever([vector_retriever, bm25_retriever],
+                similarity_top_k=10
+            )
+            retriever = fusion_retriever
+            setup_end = time.time()
+            print(f"⏱️  Retriever setup: {(setup_end - setup_start):.2f} seconds")
+        else:
+            print("\n📊 Phase 2: Setting up VECTOR-ONLY retriever (Semantic Search)...")
+            setup_start = time.time()
+            retriever = index.as_retriever(similarity_top_k=10)
+            setup_end = time.time()
+            print(f"⏱️  Retriever setup: {(setup_end - setup_start):.2f} seconds")
 
         # Phase 3: Retrieve nodes (THIS IS WHERE EMBEDDING API CALL HAPPENS!)
         print("\n📊 Phase 3: Retrieving relevant nodes...")
         print("🚨 WARNING: This phase makes an API call to embed the query!")
         print(f"   Endpoint: {os.getenv('OPENAI_API_BASE')}")
-        print(f"   Model: text-embedding-3-small")
+        print(f"   Model: text-embedding-3-large")
         retrieve_start = time.time()
 
-        nodes = fusion_retriever.retrieve(user_query)
+        nodes = retriever.retrieve(user_query)
 
         retrieve_end = time.time()
         retrieve_duration = retrieve_end - retrieve_start
@@ -216,9 +248,9 @@ def read_and_retrieve(user_query: str = "what do we have?", doc_path: str = "src
         print(f"📦 Retrieved {len(nodes)} nodes")
 
         # Phase 4: Post-processing (local, no API call)
-        print("\n📊 Phase 4: Post-processing with similarity cutoff (0.8)...")
+        print(f"\n📊 Phase 4: Post-processing with similarity cutoff ({similarity_cutoff})...")
         postprocess_start = time.time()
-        postprocessor = SimilarityPostprocessor(similarity_cutoff=0.8)
+        postprocessor = SimilarityPostprocessor(similarity_cutoff=similarity_cutoff)
         filtered_nodes = postprocessor.postprocess_nodes(nodes)
         postprocess_end = time.time()
         print(f"⏱️  Post-processing: {(postprocess_end - postprocess_start):.2f} seconds")
@@ -227,33 +259,50 @@ def read_and_retrieve(user_query: str = "what do we have?", doc_path: str = "src
         # Total time
         total_end = time.time()
         total_duration = total_end - total_start
-        print(f"\n⏱️  [read_and_retrieve] TOTAL: {total_duration:.2f} seconds")
+        print(f"\n⏱️  [{func_name}] TOTAL: {total_duration:.2f} seconds")
         print("="*60)
 
-        return(filtered_nodes)
+        # Convert filtered_nodes to formatted string
+        context_str = "\n\n---\n\n".join([node.get_content() for node in filtered_nodes])
+        return context_str
+
+
+# Backward compatibility - deprecated, use retrieve_products() or retrieve_fitting_instructions()
+@traceable
+def read_and_retrieve(user_query: str = "what do we have?", doc_path: str = "src/storage/products_emb/"):
+    """
+    DEPRECATED: Use retrieve_products() or retrieve_fitting_instructions() instead.
+    This function is kept for backward compatibility only.
+    """
+    print("⚠️  WARNING: read_and_retrieve() is deprecated. Use retrieve_products() or retrieve_fitting_instructions() instead.")
+
+    # Determine which function to use based on doc_path
+    if "products" in doc_path:
+        return retrieve_products(user_query)
+    elif "fitting" in doc_path:
+        return retrieve_fitting_instructions(user_query)
+    else:
+        # Default to products
+        return retrieve_products(user_query)
 
 
 # ============================================================================
-# 🔴 CRITICAL BUG: Debug code executing on module import!
+# For testing, uncomment the block below and run with: python -m src.embedding_loader
 # ============================================================================
-# These lines (286-288) execute EVERY TIME this module is imported!
-# This causes:
-# - Unwanted API calls and costs
-# - Slower imports
-# - Side effects in production
-# - Confusing output when importing the module
-#
-# TODO: DELETE these lines immediately OR move to:
-#       if __name__ == "__main__":
-#           # Test code here
-#
-# PRIORITY: CRITICAL - Fix this first!
-# ============================================================================
-# nodes = read_and_retrieve("super man")  # 🔴 DELETE THIS LINE
-# context_str = "\n\n".join([node.get_content() for node in nodes])  # 🔴 DELETE THIS LINE
-# print(context_str)  # 🔴 DELETE THIS LINE
-# ============================================================================
-# END OF CRITICAL BUG SECTION - DELETE LINES 286-288
+if __name__ == "__main__":
+    # print("\n" + "="*60)
+    # print("TESTING PRODUCT RETRIEVAL (Hybrid BM25 + Vector)")
+    # print("="*60)
+    # product_nodes = retrieve_products("Driver with 9° loft for right-hand players")
+    # product_context = "\n\n".join([node.get_content() for node in product_nodes])
+    # print(product_context)
+
+    print("\n" + "="*60)
+    print("TESTING FITTING INSTRUCTIONS RETRIEVAL (Vector Only)")
+    print("="*60)
+    instruction_nodes = retrieve_fitting_instructions("How to fit a driver for high swing speed")
+    
+    print(instruction_nodes)
 # ============================================================================
 
 
