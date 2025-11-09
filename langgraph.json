@@ -1,0 +1,15 @@
+{
+  "name": "golf-advisor-agent",
+  "env": ".env",
+  "python": ".venv/bin/python",
+  "watch": ["src"],
+  "graphs": {
+    "golf_advisor": "src/llm_agent.py:agent"
+  },
+  "dependencies": ["."],
+  "metadata": {
+    "description": "Golf club fitting advisor agent with retrieval tools",
+    "version": "1.0.0",
+    "tools": ["retrieve_Fitting_Instructions", "retrieve_Fitted_Products"]
+  }
+}
