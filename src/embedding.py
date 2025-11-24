@@ -3,20 +3,9 @@ import os
 import logging
 
 # Must suppress warnings BEFORE importing llama_index to catch import-time warnings
-# llama_index warning
 warnings.filterwarnings('ignore', category=UserWarning)
 os.environ['TRANSFORMERS_NO_ADVISORY_WARNINGS'] = '1'
 logging.basicConfig(level=logging.ERROR)
-
-# ============================================================================
-# IMPROVEMENT NOTE: Add better imports for 2025 best practices
-# ============================================================================
-# TODO: Add these imports for enhanced retrieval and error handling:
-# from tenacity import retry, stop_after_attempt, wait_exponential
-# from llama_index.core.node_parser import SentenceSplitter
-# from llama_index.core.postprocessor import SimilarityPostprocessor
-# from llama_index.postprocessor.cohere_rerank import CohereRerank  # For reranking (+35% accuracy)
-# ============================================================================
 
 from abc import ABC, abstractmethod
 from typing import Optional, List

@@ -1,27 +1,18 @@
 """
-LLM Agent Package
+Golf Equipment Agent Package
 
-A powerful AI agent with custom tools and memory capabilities.
+A golf club fitting expert agent with retrieval tools for fitting instructions and products.
 """
 
-from .llm_agent import LLMAgent, create_agent
-from .tools import get_tools, get_tool_names, ALL_TOOLS
-from .memory import get_conversation_memory, get_long_term_memory, ConversationMemory, LongTermMemory
-from .embedding import get_embedding_manager, EmbeddingManager
+from .tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products
+from .embedding_loader import retrieve_fitting_instructions, retrieve_products
 
 __version__ = "1.0.0"
-__author__ = "LLM Agent Team"
+__author__ = "Golf Equipment Agent Team"
 
 __all__ = [
-    "LLMAgent",
-    "create_agent",
-    "get_tools",
-    "get_tool_names",
-    "ALL_TOOLS",
-    "get_conversation_memory",
-    "get_long_term_memory",
-    "ConversationMemory",
-    "LongTermMemory",
-    "get_embedding_manager",
-    "EmbeddingManager"
+    "retrieve_Fitting_Instructions",
+    "retrieve_Fitted_Products",
+    "retrieve_fitting_instructions",
+    "retrieve_products"
 ]
