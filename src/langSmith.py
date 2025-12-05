@@ -1,5 +1,5 @@
 import os
-import time
+import re
 from dotenv import load_dotenv, find_dotenv
 from langchain_openai import ChatOpenAI
 from langsmith import traceable, Client, evaluate
@@ -7,99 +7,144 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from pydantic import SecretStr
 from tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products
+import csv
+
 
 load_dotenv(find_dotenv())
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "golf-agent-evaluation"
 
-langsmith_client = Client()
+client = Client()
 
-try:
-    with open("src/Prompt/golf_advisor_prompt.md", "r") as f:
-        system_message = f.read()
-except FileNotFoundError:
-    system_message = "You are a golf club fitting expert. Provide specific recommendations based on swing data."
+# Load prompt
+prompt_path = os.path.join(os.path.dirname(__file__), "Prompt", "golf_advisor_prompt.md")
+with open(prompt_path, "r") as f:
+    system_prompt = f.read()
 
+# Create agent
 llm = ChatOpenAI(
     model='gpt-4o-mini',
     temperature=0,
     base_url=os.getenv("OPENAI_API_BASE"),
     api_key=SecretStr(os.getenv("OPENAI_API_KEY")) if os.getenv("OPENAI_API_KEY") else None,
-    timeout=1000
 )
 
 agent = create_react_agent(
     model=llm,
     tools=[retrieve_Fitting_Instructions, retrieve_Fitted_Products],
-    checkpointer=MemorySaver()
+    checkpointer=MemorySaver(),
+    prompt=system_prompt
 )
 
+# Load test cases
+def load_test_cases():
+    test_cases = []
+    csv_path = os.path.join(os.path.dirname(__file__), "test_dataset.csv")
+    with open(csv_path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            test_cases.append({
+                "inputs": {"input": row["question"]},
+                "outputs": {"answer": row["ground_truth"]}
+            })
+    return test_cases
+
+# Get or create dataset
 dataset_name = "golf-fitting-test-cases"
-
-examples = [
-    {"inputs": {"input": "What driver specs for 95 mph swing speed?"}, "outputs": {"expected": "regular flex shaft, 10.5-12 degree loft"}},
-    {"inputs": {"input": "High swing speed 115 mph, need low spin driver"}, "outputs": {"expected": "stiff or extra stiff shaft, 8-9 degree loft, low spin head"}},
-    {"inputs": {"input": "Senior golfer, 75 mph swing, slice problem"}, "outputs": {"expected": "senior flex shaft, 12+ degree loft, draw bias or offset head"}},
-    {"inputs": {"input": "100 mph swing speed, mid handicap player, want more distance"}, "outputs": {"expected": "regular or stiff flex shaft, 9-10.5 degree loft"}},
-    {"inputs": {"input": "Professional level, 125 mph driver speed, low ball flight"}, "outputs": {"expected": "extra stiff shaft, 8-9 degree loft, tour level specs"}},
-    {"inputs": {"input": "I need a new driver"}, "outputs": {"expected": "need swing speed information, player profile, or fitting data"}},
-    {"inputs": {"input": "Best driver for me?"}, "outputs": {"expected": "need more information, swing speed, skill level, or current issues"}},
-    {"inputs": {"input": "TaylorMade driver for 105 mph swing speed"}, "outputs": {"expected": "stiff flex shaft, 9-10.5 degree loft, TaylorMade options"}},
-    {"inputs": {"input": "Senior flex but 120 mph swing speed"}, "outputs": {"expected": "conflicting information, high swing speed requires stiffer shaft"}},
-    {"inputs": {"input": "What shaft weight and flex for 90 mph swing? Also need loft recommendation."}, "outputs": {"expected": "regular flex shaft, 60-70g weight, 10.5-12 degree loft"}}
-]
-
 try:
-    dataset = langsmith_client.create_dataset(dataset_name, description="Golf club fitting test cases")
-    for example in examples:
-        langsmith_client.create_example(inputs=example["inputs"], outputs=example["outputs"], dataset_id=dataset.id)
+    dataset = client.create_dataset(
+        dataset_name=dataset_name,
+        description="Golf equipment fitting test cases"
+    )
+    examples = load_test_cases()
+    client.create_examples(
+        inputs=[ex["inputs"] for ex in examples],
+        outputs=[ex["outputs"] for ex in examples],
+        dataset_id=dataset.id
+    )
 except:
-    dataset = langsmith_client.read_dataset(dataset_name=dataset_name)
+    dataset = client.read_dataset(dataset_name=dataset_name)
 
-@traceable(name="golf_fitting_agent_full")
-def golf_fitting_agent(input_dict: dict) -> dict:
+@traceable(name="golf_agent")
+def golf_agent(input_dict: dict) -> dict:
     query = input_dict["input"]
-    thread_id = f"eval_{int(time.time() * 1000)}"
     response = agent.invoke(
         {"messages": [{"role": "user", "content": query}]},
-        config={"configurable": {"thread_id": thread_id}}
+        config={"configurable": {"thread_id": "eval"}}
     )
-    return {"output": response["messages"][-1].content}
+    return {"answer": response["messages"][-1].content}
 
-def contains_expected_keywords(run, example) -> dict:
-    output = run.outputs["output"].lower()
-    keywords = example.outputs["expected"].lower().split()
-    matches = sum(1 for keyword in keywords if keyword in output)
-    return {"key": "keyword_match", "score": 1 if matches >= len(keywords) * 0.5 else 0, "comment": f"Matched {matches}/{len(keywords)} keywords"}
+def llm_judge(run, example) -> dict:
+    query = example.inputs.get("input", "")
+    answer = run.outputs.get("answer", "")
+    expected = example.outputs.get("answer", "")
+    
+    prompt = f"""You are evaluating a golf equipment fitting recommendation. Compare the actual answer to the expected answer.
 
-def has_shaft_and_loft(run, example) -> dict:
-    output = run.outputs["output"].lower()
-    has_shaft = any(term in output for term in ["flex", "shaft", "regular", "stiff", "senior"])
-    has_loft = any(term in output for term in ["loft", "degree", "degrees"])
-    return {"key": "has_required_specs", "score": 1 if (has_shaft and has_loft) else 0, "comment": f"Shaft: {has_shaft}, Loft: {has_loft}"}
+**User Question:**
+{query}
 
-def handles_edge_cases(run, example) -> dict:
-    input_query = example.inputs["input"].lower()
-    output = run.outputs["output"].lower()
+**Expected Answer (Ground Truth):**
+{expected}
 
-    is_vague = any(phrase in input_query for phrase in ["i need", "best driver", "help me", "what should"]) and not any(term in input_query for term in ["mph", "swing speed", "handicap"])
-    is_conflicting = "senior" in input_query and any(speed in input_query for speed in ["120", "115", "110"])
+**Actual Answer from Agent:**
+{answer}
 
-    if is_vague:
-        asks_for_info = any(phrase in output for phrase in ["need more", "information", "swing speed", "tell me", "what is your"])
-        return {"key": "edge_case_handling", "score": 1 if asks_for_info else 0, "comment": f"Vague query handled: {asks_for_info}"}
-    elif is_conflicting:
-        identifies_conflict = any(phrase in output for phrase in ["conflict", "doesn't match", "inconsistent", "typically", "however"])
-        return {"key": "edge_case_handling", "score": 1 if identifies_conflict else 0, "comment": f"Conflict identified: {identifies_conflict}"}
-    else:
-        return {"key": "edge_case_handling", "score": 1, "comment": "Standard query - no special handling needed"}
+**Simple Evaluation - Check these 3 things:**
+
+1. **Is the flex recommendation correct?** (Swing speed → Flex)
+   - Slow (60-85 mph) → Senior/Regular
+   - Moderate (85-95 mph) → Regular
+   - Fast (95-105 mph) → Stiff
+   - Very Fast (105+ mph) → X-stiff/TX
+
+2. **Is the loft recommendation appropriate?** (Swing speed → Loft)
+   - Slow speeds need higher loft (12-14°)
+   - Fast speeds need lower loft (8-10°)
+
+3. **Is the model type appropriate?** (Handicap → Model)
+   - Low handicap (0-9) → Tour/LS
+   - Mid handicap (10-18) → Max/Tour-Max
+   - High handicap (19+) → Max
+
+**Also check:**
+- Does it ask for missing info if the query is vague?
+- Does it address conflicts if information contradicts?
+- Does it include key specs (flex, loft, model, handedness)?
+
+**Scoring Guide:**
+- **9-10**: All key recommendations are correct and complete
+- **7-8**: Most recommendations correct, minor issues
+- **5-6**: Some correct, but missing important elements
+- **3-4**: Major errors in key recommendations
+- **0-2**: Fundamentally wrong or completely missing critical info
+
+Respond with ONLY a number from 0-10, followed by why you take score off keep it super concise.
+
+Example:
+8.5
+Missing loft recommendation for the given swing speed.
+
+"""
+    response = llm.invoke(prompt)
+    score_text = response.content.strip()
+    
+    # Extract score (first number found)
+    score_match = re.search(r'\d+', score_text)
+    score = int(score_match.group()) / 10.0 if score_match else 0.5
+    
+    return {
+        "key": "llm_judge",
+        "score": min(max(score, 0.0), 1.0),
+        "comment": score_text[:100]
+    }
 
 if __name__ == "__main__":
-    results = evaluate(
-        golf_fitting_agent,
-        data=dataset,
-        evaluators=[contains_expected_keywords, has_shaft_and_loft, handles_edge_cases],
-        experiment_prefix="golf-agent-eval",
-        max_concurrency=1
+    evaluate(
+        golf_agent,
+        data="golf-fitting-test-cases",
+        evaluators=[llm_judge],
+        experiment_prefix="golf-eval-with-prompt",
     )
+    print("Done! View at https://smith.langchain.com/")

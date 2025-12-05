@@ -113,3 +113,5 @@ yarl==1.22.0
 zstandard==0.25.0
 Flask==3.0.0
 Flask-CORS==4.0.0
+ragas>=0.1.0
+datasets>=2.20.0

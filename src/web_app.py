@@ -13,12 +13,21 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "golf-agent-secret-key-change-in-production")
 CORS(app)
 
+# Load the system prompt
+try:
+    prompt_path = os.path.join(os.path.dirname(__file__), "Prompt", "golf_advisor_prompt.md")
+    with open(prompt_path, "r") as f:
+        system_prompt = f.read()
+except FileNotFoundError:
+    system_prompt = "You are a golf club fitting expert. Provide specific recommendations based on swing data."
+
 # Initialize agent with memory
 checkpointer = MemorySaver()
 agent = create_react_agent(
     model="openai:gpt-4o-mini",
     tools=[retrieve_Fitting_Instructions, retrieve_Fitted_Products],
-    checkpointer=checkpointer
+    checkpointer=checkpointer,
+    prompt=system_prompt
 )
 
 # Store conversation history per session

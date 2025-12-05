@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from langgraph.prebuilt import create_react_agent
+from langgraph.checkpoint.memory import MemorySaver
 import openai
 from tools import retrieve_Fitting_Instructions, retrieve_Fitted_Products
 
@@ -12,10 +13,18 @@ api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY not found")
 
+# Load the system prompt
+
+prompt_path = os.path.join(os.path.dirname(__file__), "Prompt", "golf_advisor_prompt.md")
+with open(prompt_path, "r") as f:
+        system_prompt = f.read()
+checkpointer = MemorySaver()
+
 agent = create_react_agent(
     model="openai:gpt-4o-mini",
     tools=[retrieve_Fitting_Instructions, retrieve_Fitted_Products],
-    checkpointer=None
+    checkpointer=checkpointer,
+    prompt=system_prompt
 )
 def run_agent(user_query: str, thread_id: str = None):
     if not thread_id:
