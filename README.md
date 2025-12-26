@@ -76,16 +76,6 @@ Together = Intelligent + Accurate
 
 ---
 
-## 📈 Performance Metrics
-
-| Metric | Value | Notes |
-|--------|-------|-------|
-| Response Time | 2-5 seconds | With tool calls and retrieval |
-| Accuracy | ~85% | Validated against test dataset |
-| Cost/Query | $0.002-0.005 | Optimized with GPT-4o-mini |
-
----
-
 ## 🧠 Architecture
 
 ```
@@ -106,9 +96,7 @@ User Query → LangGraph Agent → Tool Selection → LlamaIndex RAG → Respons
 
 ## 📊 Evaluation & Quality Assurance
 
-- **LangSmith Test Suite**: Validates keyword coverage, spec accuracy, edge cases
 - **RAGAS Metrics**: Measures retrieval quality, answer relevance, and faithfulness
-- **Automated Testing**: Comprehensive evaluation across multiple scenarios
 
 ---
 
@@ -125,4 +113,3 @@ This project demonstrates:
 
 **Built with LangGraph + LlamaIndex**
 
-*A demonstration of advanced AI agent development and RAG system architecture*
