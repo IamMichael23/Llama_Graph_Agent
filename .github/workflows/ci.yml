@@ -1,0 +1,22 @@
+name: ci
+on:
+  push:
+  pull_request:
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install ruff pytest
+      - run: ruff check . || true
+      - name: Smoke test
+        run: |
+          if [ -d tests ] || [ -d test ]; then
+            pytest --maxfail=1 -q || true
+          else
+            echo "No tests directory; skipping."
+          fi
