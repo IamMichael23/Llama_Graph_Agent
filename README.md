@@ -1,115 +1,80 @@
-# 🏌️ Golf Equipment AI Advisor
+# Golf Equipment Advisor — LangGraph + LlamaIndex
 
-**An intelligent conversational agent built with LangGraph and LlamaIndex for personalized golf equipment recommendations**
+A conversational RAG agent that recommends golf equipment from a curated knowledge base. Built to combine two frameworks that handle different parts of the problem: LangGraph for agent reasoning and tool orchestration, LlamaIndex for retrieval.
 
-This project demonstrates advanced AI agent development by combining two complementary frameworks to create a production-ready RAG (Retrieval-Augmented Generation) system with multi-turn reasoning capabilities.
+## What it does
 
----
+- Multi-turn chat with persistent memory (LangGraph checkpointing)
+- ReAct-style reasoning that decides when to search vs answer from context
+- Hybrid retrieval over the golf-fitting corpus (vector + BM25, with reranking)
+- LangSmith traces for every run; RAGAS for offline evaluation
 
-## 🎯 Project Overview
+## Why both frameworks
 
-An intelligent golf equipment advisor that provides expert recommendations through:
-- **Multi-turn conversational reasoning** with context-aware responses
-- **Retrieval-Augmented Generation (RAG)** over curated domain knowledge
-- **Automated evaluation** using industry-standard metrics (LangSmith, RAGAS)
-- **Tool orchestration** for dynamic information retrieval
-
----
-
-## 🤔 Why LangGraph + LlamaIndex?
-
-### The Perfect Division of Labor
-
-Each framework excels at what it's designed for:
+Each one is good at half the problem and weak at the other half:
 
 | Capability | LangGraph | LlamaIndex |
-|------------|-----------|------------|
-| **Agent Reasoning** | ✅ Excellent | ⚠️ Limited |
-| **Tool Orchestration** | ✅ Built-in | ⚠️ Basic |
-| **Multi-step Workflows** | ✅ State machines | ⚠️ Linear only |
-| **Conversation Memory** | ✅ Checkpointing | ❌ None |
-| **Document Retrieval** | ❌ None | ✅ Excellent |
-| **Vector Search** | ❌ None | ✅ Built-in |
-| **Reranking** | ❌ Manual | ✅ Built-in |
-| **RAG Synthesis** | ⚠️ Basic | ✅ Optimized |
+|---|---|---|
+| Agent reasoning / tool selection | Strong | Limited |
+| Multi-step state machines | Strong | Linear only |
+| Conversation memory + checkpointing | Strong | None |
+| Vector / hybrid retrieval | None | Strong |
+| Reranking | Manual | Built-in |
+| RAG synthesis | Basic | Optimized |
 
-### 🎯 The Synergy
+So LangGraph decides *when* to retrieve and *which* tool to use; LlamaIndex decides *how* to retrieve and *what* to return. Splitting along that line keeps each component focused.
 
-```
-LangGraph decides:           LlamaIndex executes:
-├─ WHEN to retrieve          ├─ HOW to retrieve
-├─ WHICH tool to use         ├─ WHERE to search
-├─ WHETHER to iterate        ├─ WHAT to return
-└─ HOW to respond            └─ WHY it's relevant
-
-Together = Intelligent + Accurate
-```
-
-**Example Flow:**
-
-1. **LangGraph**: "User asks about products. I should search the knowledge base."
-2. **LlamaIndex**: Searches documents, finds top 3 relevant chunks
-3. **LangGraph**: "Results look good. I'll format a personalized answer."
-4. **Result**: Accurate, source-backed recommendation
-
----
-
-## 🛠️ Tech Stack
-
-- **LangGraph**: Agent orchestration, state management, multi-turn reasoning
-- **LlamaIndex**: Vector embeddings, document retrieval, hybrid search, reranking
-- **OpenAI API**: GPT-4o-mini for reasoning, text-embedding-3-large for embeddings
-- **LangSmith**: Agent evaluation and observability
-- **RAGAS**: Automated RAG quality assessment
-- **Python**: Core implementation
-
----
-
-## 🎯 Key Features
-
-- ✅ **Multi-turn conversations** with persistent memory and context
-- ✅ **ReAct-style reasoning** with dynamic tool selection
-- ✅ **Hybrid retrieval** combining vector search and BM25
-- ✅ **LLM-based reranking** for improved relevance
-- ✅ **Automated evaluation** with comprehensive test suites
-- ✅ **Production-ready** architecture with error handling
-
----
-
-## 🧠 Architecture
+## Flow
 
 ```
-User Query → LangGraph Agent → Tool Selection → LlamaIndex RAG → Response
-                ↓
-         Memory Checkpointing
-                ↓
-         Context-Aware Reasoning
+User query
+   │
+   ▼
+LangGraph agent ──► tool: vector search   ┐
+   │                tool: BM25 search      ├─► LlamaIndex retriever
+   │                tool: reranker         ┘
+   │                                          │
+   │◄─────────── retrieved chunks ────────────┘
+   │
+   ▼
+Response (with sources)
+   │
+   ▼
+Memory checkpoint
 ```
 
-**Key Components:**
-- Agent orchestration layer (LangGraph)
-- RAG retrieval system (LlamaIndex)
-- Vector store with embeddings
-- Evaluation framework (LangSmith + RAGAS)
+## Stack
 
----
+LangGraph · LlamaIndex · OpenAI (GPT-4o-mini for reasoning, text-embedding-3-large for embeddings) · LangSmith · RAGAS · Python
 
-## 📊 Evaluation & Quality Assurance
+## Evaluation
 
-- **RAGAS Metrics**: Measures retrieval quality, answer relevance, and faithfulness
+Offline tests run through RAGAS, which scores faithfulness, answer relevancy, and context precision against a labelled question set. LangSmith captures the full trace of each agent run — useful when a retrieval looks weird and you want to see which tool the agent picked, what came back, and how the response was synthesized.
 
----
+## Key components
 
-## 🎓 Learning Outcomes
+- `agent/` — LangGraph state graph and node definitions
+- `retrieval/` — LlamaIndex index building, hybrid retriever, LLM reranker
+- `eval/` — RAGAS test suite and dataset
+- `data/` — golf fitting source documents
 
-This project demonstrates:
-- **Framework integration**: Combining complementary AI frameworks effectively
-- **RAG implementation**: Building production-ready retrieval systems
-- **Agent architecture**: Designing multi-turn conversational AI
-- **Evaluation practices**: Implementing comprehensive quality assurance
-- **Technical decision-making**: Understanding trade-offs between frameworks
+## Run it locally
 
----
+```bash
+python -m venv .venv
+source .venv/bin/activate           # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 
-**Built with LangGraph + LlamaIndex**
+# Set OpenAI + LangSmith keys
+cp .env.example .env
 
+# Build the index (one-time)
+python build_index.py
+
+# Run the agent
+python run_agent.py
+```
+
+## What this project demonstrates
+
+Working with two complementary AI frameworks instead of forcing one to do both jobs. The LangGraph + LlamaIndex split is more code than a single-framework solution, but it makes the agent loop and the retrieval pipeline independently testable, which matters more than line count once a project gets past the demo stage.
